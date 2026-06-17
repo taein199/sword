@@ -87,7 +87,7 @@
             overflow: hidden;
             border: 3px solid #2d2d3d;
             transition: transform 0.05s ease;
-            position: relative; /* 단련 텍스트 배치를 위해 추가 */
+            position: relative;
         }
         
         @keyframes borderPulse {
@@ -102,7 +102,6 @@
         #sword-power { font-size: 20px; color: #fff; font-weight: 900; background: #1a1a24; padding: 10px 25px; border-radius: 25px; border: 2px solid #333; }
         .power-highlight { color: #00ff88; }
 
-        /* ✨ 단련시 나타나는 플로팅 텍스트 애니메이션 */
         .floating-text {
             position: absolute;
             color: #00ff88;
@@ -137,6 +136,24 @@
         }
         button:active { transform: scale(0.96); filter: brightness(0.8); }
         button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* 📱 앱 다운로드 버튼 스타일 */
+        #btn-install {
+            display: none; /* 기본은 숨김 */
+            padding: 18px;
+            font-size: 22px;
+            background: linear-gradient(135deg, #0052d4, #4364f7, #6fb1fc);
+            color: white;
+            border: 2px solid #fff;
+            box-shadow: 0 0 20px rgba(67, 100, 247, 0.6);
+            margin-bottom: 5px;
+            animation: pulseBtn 2s infinite;
+        }
+        @keyframes pulseBtn {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(67, 100, 247, 0.9); }
+            100% { transform: scale(1); }
+        }
 
         #btn-click {
             padding: 26px 20px;
@@ -211,6 +228,34 @@
         .btn-shop { padding: 18px; font-size: 18px; background: #111116; color: #aaaabb; border: 2px dashed #333344; }
         .btn-shop:hover { color: #00e5ff; border-color: #00e5ff; background: #1a1a24; }
 
+        #btn-reward-ad {
+            padding: 16px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #004d40, #00796b);
+            color: #00ffcc;
+            border: 2px solid #00bfa5;
+            box-shadow: 0 0 15px rgba(0, 191, 165, 0.3);
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+            margin-top: 5px;
+        }
+
+        #ad-banner-container {
+            width: 100%;
+            min-height: 60px;
+            background: #111116;
+            border: 2px solid #22222a;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #555566;
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 10px;
+            text-align: center;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
         .shake { animation: shakeEffect 0.4s ease-in-out; }
         @keyframes shakeEffect {
             0%, 100% { transform: translateX(0); }
@@ -265,7 +310,6 @@
         .btn-reset { padding: 22px 50px; font-size: 24px; font-weight: 900; background: #ff0055; color: white; border-radius: 40px; box-shadow: 0 0 30px rgba(255, 0, 85, 0.8); }
         @keyframes mythicPulse { 0% { transform: scale(0.95); } 100% { transform: scale(1.05); } }
 
-        /* 🔍 이 칼 자랑하기 (보기전용 모드) 오버레이 화면 */
         #share-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(180deg, #0e0e14 0%, #050507 100%); z-index: 150;
@@ -299,8 +343,9 @@
     </main>
 
     <div id="controls">
+        <button id="btn-install">📱 내 폰에 앱으로 다운로드하기</button>
+
         <button id="btn-click" onclick="earnGold()">⛏️ 단련 (골드 채굴)</button>
-        <!-- 자랑하기 버튼 배치 -->
         <button id="btn-share" onclick="shareSword()">🔗 이 칼 자랑하기 (링크 복사)</button>
 
         <button id="btn-gamble" onclick="gambbleGold()">
@@ -327,11 +372,17 @@
             <button class="btn-shop" onclick="buyTickets(1)">+1장 구매</button>
             <button class="btn-shop" onclick="buyTickets(10)">+10장 구매</button>
         </div>
+
+        <button id="btn-reward-ad" onclick="watchRewardedAd()">📺 광고 보고 보호권 10장 받기</button>
+
+        <div id="ad-banner-container">
+            <span style="color: #444455; font-size: 11px; display:block; margin-bottom:2px;">SPONSORED AD</span>
+            구글 배너 광고가 표시되는 영역입니다
+        </div>
     </div>
 
     <div id="log-container"></div>
 
-    <!-- 신화 달성 오버레이 -->
     <div id="mythic-overlay">
         <div class="mythic-title">APOCALYPSE</div>
         <div style="color:#aaa; letter-spacing: 5px; font-size: 18px; font-weight: bold;">신화의 끝에 도달했습니다</div>
@@ -344,7 +395,6 @@
         <button class="btn-reset" onclick="resetGame()">윤회 (처음으로)</button>
     </div>
 
-    <!-- 🔍 친구가 보는 '이 칼 자랑하기' 전용 오버레이 화면 (보기만 가능) -->
     <div id="share-overlay">
         <div class="share-banner">✨ 누군가가 무기를 자랑했습니다! ✨</div>
         <div id="share-image-container" style="width: 200px; height: 200px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; overflow: hidden; border: 3px solid #2d2d3d; transition: all 0.3s ease;">
@@ -359,7 +409,32 @@
 </div>
 
 <script>
-    // --- BGM 및 오디오 초기화 설정 ---
+    // --- 📱 PWA 앱 다운로드(설치) 로직 ---
+    let deferredPrompt;
+    const installBtn = document.getElementById('btn-install');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'block'; 
+    });
+
+    installBtn.addEventListener('click', async () => {
+        if (deferredPrompt !== null) {
+            deferredPrompt.prompt(); 
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                installBtn.style.display = 'none'; 
+            }
+            deferredPrompt = null;
+        }
+    });
+
+    window.addEventListener('appinstalled', () => {
+        installBtn.style.display = 'none'; 
+    });
+
+    // --- 🎵 오디오 및 BGM 로직 ---
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioCtx = AudioContext ? new AudioContext() : null;
     
@@ -367,21 +442,26 @@
     bgmAudio.loop = true;
     bgmAudio.volume = 0.4;
     let isBgmPlaying = false;
+    let audioInitialized = false;
 
     function initAudio() {
-        if (!isBgmPlaying) {
-            bgmAudio.play().catch(e => console.log("BGM 재생 대기 중:", e));
-            isBgmPlaying = true;
-        }
+        if (audioInitialized) return;
+        
         if (audioCtx && audioCtx.state === 'suspended') {
             audioCtx.resume();
+        }
+        
+        if (!isBgmPlaying) {
+            bgmAudio.play().then(() => {
+                isBgmPlaying = true;
+                audioInitialized = true;
+            }).catch(e => console.log("BGM 재생 대기 중:", e));
         }
     }
 
     document.body.addEventListener('click', initAudio, { once: true });
     document.body.addEventListener('touchstart', initAudio, { once: true });
 
-    // --- 효과음 재생 ---
     function playSound(type) {
         if (!audioCtx) return;
         const osc = audioCtx.createOscillator();
@@ -458,7 +538,7 @@
         { level: 10, name: "영원한 종말: 아포칼립스", desc: "우주의 파멸. 절대적인 신화의 무기.", power: 999999, cost: "MAX", prob: "MAX", color: "#ff0055", glow: "rgba(255,0,85,1)" }
     ];
 
-    let currentLevel = 1;
+    let currentLevel = 1; 
     let currentGold = 0;
     let currentTickets = 0;
     const TICKET_PRICE = 10000;
@@ -479,14 +559,14 @@
     const uiBtnClick = document.getElementById('btn-click');
     const uiBtnGamble = document.getElementById('btn-gamble');
     const uiBtnGambleText = document.getElementById('btn-gamble-text');
+    const uiBtnRewardAd = document.getElementById('btn-reward-ad');
     const chkTicket = document.getElementById('chk-ticket');
     const logContainer = document.getElementById('log-container');
     const gameContainer = document.getElementById('game-container');
 
-    // --- 게임 로직 ---
-
-    // ⛏️ 단련하기 (클릭 수확 + 화면 효과 추가)
     function earnGold() {
+        initAudio(); 
+        
         const currentPower = swords[currentLevel - 1].power;
         currentGold += currentPower;
         uiGold.innerText = currentGold.toLocaleString();
@@ -494,12 +574,10 @@
         playSound('hit');
         triggerVibe([15]); 
 
-        // 💥 화면 효과 1: 숫자가 공중으로 튀어나오는 플로팅 이펙트 생성
         const textNode = document.createElement('div');
         textNode.className = 'floating-text';
         textNode.innerText = `+${currentPower.toLocaleString()} G`;
         
-        // 정중앙 근처로 약간의 랜덤 편차 부여
         const randomX = 40 + Math.random() * 20; 
         const randomY = 40 + Math.random() * 20; 
         textNode.style.left = `${randomX}%`;
@@ -508,32 +586,28 @@
         uiImageContainer.appendChild(textNode);
         setTimeout(() => textNode.remove(), 500);
 
-        // 💥 화면 효과 2: 검 이미지 상자가 클릭 시 순간적으로 수축했다가 튕겨 나오는 Bounce 효과
         uiImageContainer.style.transform = 'scale(0.93)';
-        setTimeout(() => {
-            uiImageContainer.style.transform = 'scale(1)';
-        }, 50);
+        setTimeout(() => { uiImageContainer.style.transform = 'scale(1)'; }, 50);
 
         if (!isProcessing) {
             updateUI();
         }
     }
 
-    // 🔗 이 칼 자랑하기 기능 (링크 생성 및 복사)
     function shareSword() {
+        initAudio();
         if (isProcessing) return;
-        // 주소 뒤에 ?share=레벨 주석 매개변수를 붙여 유일한 링크 빌드
         const shareUrl = `${window.location.origin}${window.location.pathname}?share=${currentLevel}`;
         
         navigator.clipboard.writeText(shareUrl).then(() => {
             showLog("자랑하기 링크가 복사되었습니다! 친구에게 보내보세요. 🔗", "success");
         }).catch(() => {
-            // 구형 기기 브라우저 대응 Fallback
             alert(`아래 링크를 길게 눌러 복사하세요:\n${shareUrl}`);
         });
     }
 
     function gambbleGold() {
+        initAudio();
         if (isProcessing) return;
         if (currentGold < 10) {
             showLog("최소 10 골드가 필요합니다.", "warning");
@@ -574,7 +648,39 @@
         }, 900);
     }
 
+    function watchRewardedAd() {
+        initAudio();
+        if (isProcessing) return;
+
+        isProcessing = true;
+        setButtonState(true);
+        
+        let timeLeft = 3;
+        uiBtnRewardAd.innerText = `🎬 광고 시청 중... (${timeLeft}초)`;
+
+        let adTimer = setInterval(() => {
+            timeLeft--;
+            if (timeLeft > 0) {
+                uiBtnRewardAd.innerText = `🎬 광고 시청 중... (${timeLeft}초)`;
+                playSound('tick');
+            } else {
+                clearInterval(adTimer);
+                
+                currentTickets += 10;
+                isProcessing = false;
+                setButtonState(false);
+                uiBtnRewardAd.innerText = "📺 광고 보고 보호권 10장 받기";
+                
+                playSound('success');
+                triggerVibe([100, 50, 100]);
+                showLog("광고 시청 완료! 보호권 10장 획득! 🛡️", "success");
+                updateUI();
+            }
+        }, 1000);
+    }
+
     function buyTickets(amount) {
+        initAudio();
         if (isProcessing) return;
         let cost = amount * TICKET_PRICE;
         if (currentGold < cost) {
@@ -591,6 +697,7 @@
     function setButtonState(disabled) {
         uiBtnUpgrade.disabled = disabled;
         uiBtnGamble.disabled = disabled;
+        uiBtnRewardAd.disabled = disabled;
         document.querySelectorAll('.btn-shop').forEach(b => b.disabled = disabled);
     }
 
@@ -629,6 +736,7 @@
     }
 
     function upgradeSword() {
+        initAudio();
         if (isProcessing || currentLevel >= 10) return;
 
         const sword = swords[currentLevel - 1];
@@ -727,13 +835,11 @@
         updateUI();
     }
 
-    // --- 🔍 페이지 로드 시 '자랑하기 주소(?share=숫자)' 탐지 시스템 ---
     const urlParams = new URLSearchParams(window.location.search);
     const shareParam = urlParams.get('share');
 
     if (shareParam) {
         const shareLevel = parseInt(shareParam, 10);
-        // 정상적인 범위(1강 ~ 10강)의 데이터가 전달되었다면 보기전용 화면을 활성화
         if (shareLevel >= 1 && shareLevel <= 10) {
             const sword = swords[shareLevel - 1];
             
@@ -752,13 +858,21 @@
             document.getElementById('share-sword-desc').innerText = sword.desc;
             document.getElementById('share-click-power').innerText = sword.power.toLocaleString();
             
-            // 보기 모드 화면 활성화 (기존 게임 UI 전체를 뒤덮음)
             document.getElementById('share-overlay').classList.add('active');
         } else {
             updateUI();
         }
     } else {
         updateUI();
+    }
+
+    // --- ⚙️ 서비스 워커 등록 (PWA 앱 다운로드 버튼 활성화를 위해 필수!) ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('서비스 워커가 성공적으로 등록되었습니다.'))
+                .catch(err => console.log('서비스 워커 등록 실패:', err));
+        });
     }
 </script>
 </body>
