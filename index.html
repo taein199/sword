@@ -29,24 +29,22 @@
 
         #game-container {
             width: 100%;
-            max-width: 450px; /* 폰트가 커져서 가로폭 살짝 여유 있게 */
+            max-width: 450px;
             height: 100%;
             display: flex;
             flex-direction: column;
             background: linear-gradient(180deg, #111116 0%, #0a0a0d 100%);
             box-shadow: 0 0 50px rgba(0,0,0,1);
             position: relative;
-            overflow-y: auto; /* 화면이 작을 경우 스크롤 허용 */
+            overflow-y: auto;
         }
         
-        /* 스크롤바 숨기기 */
         #game-container::-webkit-scrollbar { display: none; }
 
-        /* 👑 제작자 태그 */
         #creator-tag {
             background: #000000;
             color: #125f46;
-            font-size: 30px; /* 글씨 아주 크게 */
+            font-size: 30px;
             font-weight: 900;
             text-align: center;
             padding: 8px 0;
@@ -54,7 +52,6 @@
             border-bottom: 2px solid #220011;
         }
 
-        /* 상단 UI */
         header {
             padding: 20px;
             background: rgba(20, 20, 25, 0.8);
@@ -68,7 +65,6 @@
         #gold-display { font-size: 28px; color: #ffce00; font-weight: 900; text-shadow: 0 0 15px rgba(255, 206, 0, 0.5); }
         #ticket-display { font-size: 18px; color: #00e5ff; font-weight: 900; }
 
-        /* 검 디스플레이 영역 */
         #sword-display {
             flex: 1;
             display: flex;
@@ -90,7 +86,8 @@
             margin-bottom: 25px;
             overflow: hidden;
             border: 3px solid #2d2d3d;
-            transition: all 0.3s ease;
+            transition: transform 0.05s ease;
+            position: relative; /* 단련 텍스트 배치를 위해 추가 */
         }
         
         @keyframes borderPulse {
@@ -105,7 +102,22 @@
         #sword-power { font-size: 20px; color: #fff; font-weight: 900; background: #1a1a24; padding: 10px 25px; border-radius: 25px; border: 2px solid #333; }
         .power-highlight { color: #00ff88; }
 
-        /* 하단 컨트롤 영역 */
+        /* ✨ 단련시 나타나는 플로팅 텍스트 애니메이션 */
+        .floating-text {
+            position: absolute;
+            color: #00ff88;
+            font-size: 28px;
+            font-weight: 900;
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.8), 0 0 20px rgba(0,255,136,0.4);
+            animation: floatUp 0.5s ease-out forwards;
+            z-index: 10;
+        }
+        @keyframes floatUp {
+            0% { transform: translate(-50%, -50%) scale(0.6); opacity: 1; }
+            100% { transform: translate(-50%, -120px) scale(1.2); opacity: 0; }
+        }
+
         #controls {
             padding: 20px;
             background: #0a0a0d;
@@ -126,10 +138,9 @@
         button:active { transform: scale(0.96); filter: brightness(0.8); }
         button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-        /* ⛏️ 메인 단련 버튼 (최상단, 거대하게 배치) */
         #btn-click {
-            padding: 30px 20px;
-            font-size: 32px;
+            padding: 26px 20px;
+            font-size: 30px;
             background: linear-gradient(135deg, #1e1e28, #2a2a35);
             color: #00ff88;
             border: 3px solid #00ff88;
@@ -142,7 +153,16 @@
             box-shadow: 0 0 40px rgba(0, 255, 136, 0.6);
         }
 
-        /* 🎰 도박 버튼 */
+        #btn-share {
+            padding: 12px;
+            font-size: 16px;
+            background: #161622;
+            color: #00e5ff;
+            border: 2px dashed #00e5ff;
+            margin-top: -5px;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.1);
+        }
+
         #btn-gamble {
             padding: 20px;
             font-size: 22px;
@@ -186,13 +206,11 @@
         #upgrade-prob { color: #ffebee; }
         #upgrade-ticket-info { color: #84ffff; font-size: 16px; margin-top: 4px; }
 
-        /* 상점 디자인 */
         .shop-title { font-size: 16px; color: #777788; margin-top: 5px; font-weight: 900; text-align: center; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .btn-shop { padding: 18px; font-size: 18px; background: #111116; color: #aaaabb; border: 2px dashed #333344; }
         .btn-shop:hover { color: #00e5ff; border-color: #00e5ff; background: #1a1a24; }
 
-        /* 애니메이션 효과 */
         .shake { animation: shakeEffect 0.4s ease-in-out; }
         @keyframes shakeEffect {
             0%, 100% { transform: translateX(0); }
@@ -206,7 +224,6 @@
             to { background-color: #aa0000; box-shadow: 0 0 40px #ff0000; }
         }
 
-        /* 로그 메시지 */
         #log-container {
             position: absolute;
             top: 40%;
@@ -222,7 +239,7 @@
             border: 2px solid #333;
             padding: 15px 25px;
             border-radius: 12px;
-            font-size: 20px; /* 로그 텍스트 대형화 */
+            font-size: 20px;
             font-weight: 900;
             opacity: 0;
             transition: all 0.2s ease;
@@ -235,7 +252,6 @@
         .log-gamble-win { color: #ffce00; border-color: #ffce00; text-shadow: 0 0 15px rgba(255,206,0,0.6); font-size: 24px; }
         .log-warning { color: #ff9100; border-color: #ff9100; }
 
-        /* 신화 오버레이 */
         #mythic-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.98); z-index: 100;
@@ -248,6 +264,16 @@
         .mythic-sword-box img { width: 100%; height: 100%; object-fit: cover; }
         .btn-reset { padding: 22px 50px; font-size: 24px; font-weight: 900; background: #ff0055; color: white; border-radius: 40px; box-shadow: 0 0 30px rgba(255, 0, 85, 0.8); }
         @keyframes mythicPulse { 0% { transform: scale(0.95); } 100% { transform: scale(1.05); } }
+
+        /* 🔍 이 칼 자랑하기 (보기전용 모드) 오버레이 화면 */
+        #share-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, #0e0e14 0%, #050507 100%); z-index: 150;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            padding: 30px; text-align: center;
+        }
+        #share-overlay.active { display: flex; }
+        .share-banner { font-size: 16px; color: #00e5ff; font-weight: 900; letter-spacing: 3px; background: rgba(0, 229, 255, 0.1); padding: 6px 16px; border-radius: 20px; border: 1px solid rgba(0, 229, 255, 0.3); margin-bottom: 25px; }
     </style>
 </head>
 <body>
@@ -273,11 +299,12 @@
     </main>
 
     <div id="controls">
-        <!-- 메인 단련 버튼을 최상단으로 분리 및 확대 -->
         <button id="btn-click" onclick="earnGold()">⛏️ 단련 (골드 채굴)</button>
+        <!-- 자랑하기 버튼 배치 -->
+        <button id="btn-share" onclick="shareSword()">🔗 이 칼 자랑하기 (링크 복사)</button>
 
-        <button id="btn-gamble" onclick="gambleGold()">
-            <span>🎲 암시장 도박</span>
+        <button id="btn-gamble" onclick="gambbleGold()">
+            <span id="btn-gamble-text">🎲 암시장 도박</span>
             <span class="gamble-sub">보유 골드 50% 걸기 (승률 40%)</span>
         </button>
         
@@ -287,7 +314,7 @@
         </div>
 
         <button id="btn-upgrade" onclick="upgradeSword()">
-            <span>망치 내리치기</span>
+            <span id="btn-upgrade-text">망치 내리치기</span>
             <div class="btn-info-box">
                 <span id="upgrade-cost">비용: 0</span>
                 <span id="upgrade-prob">확률: 0%</span>
@@ -304,6 +331,7 @@
 
     <div id="log-container"></div>
 
+    <!-- 신화 달성 오버레이 -->
     <div id="mythic-overlay">
         <div class="mythic-title">APOCALYPSE</div>
         <div style="color:#aaa; letter-spacing: 5px; font-size: 18px; font-weight: bold;">신화의 끝에 도달했습니다</div>
@@ -315,15 +343,47 @@
         </div>
         <button class="btn-reset" onclick="resetGame()">윤회 (처음으로)</button>
     </div>
+
+    <!-- 🔍 친구가 보는 '이 칼 자랑하기' 전용 오버레이 화면 (보기만 가능) -->
+    <div id="share-overlay">
+        <div class="share-banner">✨ 누군가가 무기를 자랑했습니다! ✨</div>
+        <div id="share-image-container" style="width: 200px; height: 200px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; overflow: hidden; border: 3px solid #2d2d3d; transition: all 0.3s ease;">
+            <img id="share-sword-image" src="1.jpg" alt="검">
+        </div>
+        <h2 id="share-sword-name" style="font-size: 36px; margin-bottom: 10px; font-weight: 900; letter-spacing: -1px;">+1 검이름</h2>
+        <p id="share-sword-desc" style="font-size: 18px; color: #8a8a96; margin-bottom: 25px; height: 50px; padding: 0 20px; word-break: keep-all; line-height: 1.4; font-weight: 600;"></p>
+        <div id="share-sword-power" style="font-size: 20px; color: #fff; font-weight: 900; background: #1a1a24; padding: 10px 25px; border-radius: 25px; border: 2px solid #333; margin-bottom: 40px;">클릭 수익: <span style="color: #00ff88;">+<span id="share-click-power">1</span> G</span></div>
+        <button class="btn-reset" onclick="location.href=window.location.pathname" style="background: linear-gradient(135deg, #00ff88, #00e5ff); color: #000; box-shadow: 0 0 25px rgba(0,229,255,0.4); padding: 18px 40px; font-size: 20px;">나도 무기 강화하러 가기 ⚔️</button>
+        <div style="color: #444; font-size: 14px; font-weight: bold; margin-top: 20px;">제작자: 김태인</div>
+    </div>
 </div>
 
 <script>
+    // --- BGM 및 오디오 초기화 설정 ---
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioCtx = AudioContext ? new AudioContext() : null;
+    
+    const bgmAudio = new Audio('bgm.mp3');
+    bgmAudio.loop = true;
+    bgmAudio.volume = 0.4;
+    let isBgmPlaying = false;
 
+    function initAudio() {
+        if (!isBgmPlaying) {
+            bgmAudio.play().catch(e => console.log("BGM 재생 대기 중:", e));
+            isBgmPlaying = true;
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    document.body.addEventListener('click', initAudio, { once: true });
+    document.body.addEventListener('touchstart', initAudio, { once: true });
+
+    // --- 효과음 재생 ---
     function playSound(type) {
         if (!audioCtx) return;
-        if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
         osc.connect(gainNode);
@@ -336,6 +396,13 @@
             gainNode.gain.setValueAtTime(0.05, now);
             gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
             osc.start(now); osc.stop(now + 0.05);
+        } else if (type === 'hit') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(1200, now); 
+            osc.frequency.exponentialRampToValueAtTime(600, now + 0.08); 
+            gainNode.gain.setValueAtTime(0.15, now); 
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+            osc.start(now); osc.stop(now + 0.08);
         } else if (type === 'success') {
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(523.25, now);
@@ -408,27 +475,65 @@
     const uiUpgradeProb = document.getElementById('upgrade-prob');
     const uiTicketInfo = document.getElementById('upgrade-ticket-info');
     const uiBtnUpgrade = document.getElementById('btn-upgrade');
+    const uiBtnUpgradeText = document.getElementById('btn-upgrade-text');
     const uiBtnClick = document.getElementById('btn-click');
     const uiBtnGamble = document.getElementById('btn-gamble');
+    const uiBtnGambleText = document.getElementById('btn-gamble-text');
     const chkTicket = document.getElementById('chk-ticket');
     const logContainer = document.getElementById('log-container');
     const gameContainer = document.getElementById('game-container');
 
-    // 단련 버튼: 클릭 시 약한 진동 추가 및 딜레이 중에도 골드 수급 가능
-    function earnGold() {
-        currentGold += swords[currentLevel - 1].power;
-        uiGold.innerText = currentGold.toLocaleString(); // 글자 즉시 업데이트
-        
-        // ⚡ 클릭할 때마다 아주 약하고 경쾌한 진동 발생 (10ms)
-        triggerVibe([10]); 
+    // --- 게임 로직 ---
 
-        // 강화 중이 아닐 때만 UI 전체 새로고침
+    // ⛏️ 단련하기 (클릭 수확 + 화면 효과 추가)
+    function earnGold() {
+        const currentPower = swords[currentLevel - 1].power;
+        currentGold += currentPower;
+        uiGold.innerText = currentGold.toLocaleString();
+        
+        playSound('hit');
+        triggerVibe([15]); 
+
+        // 💥 화면 효과 1: 숫자가 공중으로 튀어나오는 플로팅 이펙트 생성
+        const textNode = document.createElement('div');
+        textNode.className = 'floating-text';
+        textNode.innerText = `+${currentPower.toLocaleString()} G`;
+        
+        // 정중앙 근처로 약간의 랜덤 편차 부여
+        const randomX = 40 + Math.random() * 20; 
+        const randomY = 40 + Math.random() * 20; 
+        textNode.style.left = `${randomX}%`;
+        textNode.style.top = `${randomY}%`;
+        
+        uiImageContainer.appendChild(textNode);
+        setTimeout(() => textNode.remove(), 500);
+
+        // 💥 화면 효과 2: 검 이미지 상자가 클릭 시 순간적으로 수축했다가 튕겨 나오는 Bounce 효과
+        uiImageContainer.style.transform = 'scale(0.93)';
+        setTimeout(() => {
+            uiImageContainer.style.transform = 'scale(1)';
+        }, 50);
+
         if (!isProcessing) {
             updateUI();
         }
     }
 
-    function gambleGold() {
+    // 🔗 이 칼 자랑하기 기능 (링크 생성 및 복사)
+    function shareSword() {
+        if (isProcessing) return;
+        // 주소 뒤에 ?share=레벨 주석 매개변수를 붙여 유일한 링크 빌드
+        const shareUrl = `${window.location.origin}${window.location.pathname}?share=${currentLevel}`;
+        
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            showLog("자랑하기 링크가 복사되었습니다! 친구에게 보내보세요. 🔗", "success");
+        }).catch(() => {
+            // 구형 기기 브라우저 대응 Fallback
+            alert(`아래 링크를 길게 눌러 복사하세요:\n${shareUrl}`);
+        });
+    }
+
+    function gambbleGold() {
         if (isProcessing) return;
         if (currentGold < 10) {
             showLog("최소 10 골드가 필요합니다.", "warning");
@@ -441,16 +546,15 @@
 
         isProcessing = true;
         setButtonState(true);
-        uiBtnGamble.innerHTML = "주사위 굴리는 중... 🎲";
+        uiBtnGambleText.innerText = "주사위 굴리는 중... 🎲";
 
-        let ticks = 0;
         let tickInt = setInterval(() => { playSound('tick'); triggerVibe([30]); }, 150);
 
         setTimeout(() => {
             clearInterval(tickInt);
             isProcessing = false;
             setButtonState(false);
-            uiBtnGamble.innerHTML = `<span>🎲 암시장 도박</span><span class="gamble-sub">보유 골드 50% 걸기 (승률 40%)</span>`;
+            uiBtnGambleText.innerText = "🎲 암시장 도박";
 
             let rand = Math.random() * 100;
             if (rand <= 40) {
@@ -488,7 +592,6 @@
         uiBtnUpgrade.disabled = disabled;
         uiBtnGamble.disabled = disabled;
         document.querySelectorAll('.btn-shop').forEach(b => b.disabled = disabled);
-        // btn-click은 비활성화하지 않음 (강화 중에도 캘 수 있게)
     }
 
     function updateUI() {
@@ -548,7 +651,8 @@
         isProcessing = true;
         setButtonState(true);
         uiBtnUpgrade.classList.add('upgrading-effect');
-        uiBtnUpgrade.innerHTML = "망치질 중... 🔨";
+        
+        uiBtnUpgradeText.innerText = "망치질 중... 🔨";
 
         let tickInt = setInterval(() => {
             playSound('tick');
@@ -560,14 +664,8 @@
             isProcessing = false;
             setButtonState(false);
             uiBtnUpgrade.classList.remove('upgrading-effect');
-            uiBtnUpgrade.innerHTML = `
-                <span>망치 내리치기</span>
-                <div class="btn-info-box">
-                    <span id="upgrade-cost"></span>
-                    <span id="upgrade-prob"></span>
-                </div>
-                <span id="upgrade-ticket-info"></span>
-            `;
+            
+            uiBtnUpgradeText.innerText = "망치 내리치기";
 
             const randomNum = Math.random() * 100;
 
@@ -629,7 +727,39 @@
         updateUI();
     }
 
-    updateUI();
+    // --- 🔍 페이지 로드 시 '자랑하기 주소(?share=숫자)' 탐지 시스템 ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const shareParam = urlParams.get('share');
+
+    if (shareParam) {
+        const shareLevel = parseInt(shareParam, 10);
+        // 정상적인 범위(1강 ~ 10강)의 데이터가 전달되었다면 보기전용 화면을 활성화
+        if (shareLevel >= 1 && shareLevel <= 10) {
+            const sword = swords[shareLevel - 1];
+            
+            document.getElementById('share-sword-image').src = `${shareLevel}.jpg`;
+            
+            const shareImgContainer = document.getElementById('share-image-container');
+            shareImgContainer.style.setProperty('--glow-color', sword.glow);
+            shareImgContainer.style.borderColor = sword.color;
+            shareImgContainer.style.animation = "borderPulse 2s infinite";
+            
+            const shareName = document.getElementById('share-sword-name');
+            shareName.innerText = `+${shareLevel} ${sword.name}`;
+            shareName.style.color = sword.color;
+            shareName.style.textShadow = `0 0 20px ${sword.glow}`;
+            
+            document.getElementById('share-sword-desc').innerText = sword.desc;
+            document.getElementById('share-click-power').innerText = sword.power.toLocaleString();
+            
+            // 보기 모드 화면 활성화 (기존 게임 UI 전체를 뒤덮음)
+            document.getElementById('share-overlay').classList.add('active');
+        } else {
+            updateUI();
+        }
+    } else {
+        updateUI();
+    }
 </script>
 </body>
 </html>
