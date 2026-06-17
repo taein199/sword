@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>검 강화하기</title>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        body {
+            background-color: #050507;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 450px; /* 폰트가 커져서 가로폭 살짝 여유 있게 */
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(180deg, #111116 0%, #0a0a0d 100%);
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+            position: relative;
+            overflow-y: auto; /* 화면이 작을 경우 스크롤 허용 */
+        }
+        
+        /* 스크롤바 숨기기 */
+        #game-container::-webkit-scrollbar { display: none; }
+
+        /* 👑 제작자 태그 */
+        #creator-tag {
+            background: #000000;
+            color: #125f46;
+            font-size: 30px; /* 글씨 아주 크게 */
+            font-weight: 900;
+            text-align: center;
+            padding: 8px 0;
+            letter-spacing: 4px;
+            border-bottom: 2px solid #220011;
+        }
+
+        /* 상단 UI */
+        header {
+            padding: 20px;
+            background: rgba(20, 20, 25, 0.8);
+            border-bottom: 2px solid #2a2a35;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        h1 { font-size: 26px; color: #a0a0ab; font-weight: 900; }
+        .currency-box { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+        #gold-display { font-size: 28px; color: #ffce00; font-weight: 900; text-shadow: 0 0 15px rgba(255, 206, 0, 0.5); }
+        #ticket-display { font-size: 18px; color: #00e5ff; font-weight: 900; }
+
+        /* 검 디스플레이 영역 */
+        #sword-display {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 15px;
+            text-align: center;
+        }
+        
+        #image-container {
+            width: 180px;
+            height: 180px;
+            border-radius: 20px;
+            background-color: #0a0a0d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            overflow: hidden;
+            border: 3px solid #2d2d3d;
+            transition: all 0.3s ease;
+        }
+        
+        @keyframes borderPulse {
+            0% { box-shadow: 0 0 15px var(--glow-color), inset 0 0 15px var(--glow-color); }
+            50% { box-shadow: 0 0 40px var(--glow-color), inset 0 0 25px var(--glow-color); }
+            100% { box-shadow: 0 0 15px var(--glow-color), inset 0 0 15px var(--glow-color); }
+        }
+
+        #sword-image { width: 100%; height: 100%; object-fit: cover; }
+        #sword-name { font-size: 36px; margin-bottom: 10px; font-weight: 900; letter-spacing: -1px; }
+        #sword-desc { font-size: 18px; color: #8a8a96; margin-bottom: 20px; height: 50px; padding: 0 20px; word-break: keep-all; line-height: 1.4; font-weight: 600; }
+        #sword-power { font-size: 20px; color: #fff; font-weight: 900; background: #1a1a24; padding: 10px 25px; border-radius: 25px; border: 2px solid #333; }
+        .power-highlight { color: #00ff88; }
+
+        /* 하단 컨트롤 영역 */
+        #controls {
+            padding: 20px;
+            background: #0a0a0d;
+            border-top: 2px solid #2a2a35;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        button {
+            width: 100%;
+            border: none;
+            border-radius: 15px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        button:active { transform: scale(0.96); filter: brightness(0.8); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* ⛏️ 메인 단련 버튼 (최상단, 거대하게 배치) */
+        #btn-click {
+            padding: 30px 20px;
+            font-size: 32px;
+            background: linear-gradient(135deg, #1e1e28, #2a2a35);
+            color: #00ff88;
+            border: 3px solid #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        #btn-click:active {
+            background: #00ff88;
+            color: #000;
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.6);
+        }
+
+        /* 🎰 도박 버튼 */
+        #btn-gamble {
+            padding: 20px;
+            font-size: 22px;
+            background: linear-gradient(135deg, #7b1fa2, #e53935);
+            color: white;
+            border: 2px solid #ff5252;
+            box-shadow: 0 0 15px rgba(229, 57, 53, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .gamble-sub { font-size: 16px; font-weight: bold; color: #ffcccc; }
+
+        #ticket-toggle-container {
+            background: #141419;
+            padding: 15px 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 2px solid #2a2a35;
+        }
+        .toggle-label { font-size: 18px; color: #b0b0b5; display: flex; align-items: center; gap: 8px; font-weight: bold; }
+        #chk-ticket { width: 26px; height: 26px; accent-color: #00e5ff; }
+
+        #btn-upgrade {
+            padding: 22px;
+            font-size: 28px;
+            background: linear-gradient(135deg, #ff3d00, #ff9100);
+            color: white;
+            box-shadow: 0 4px 25px rgba(255, 61, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .btn-info-box { display: flex; gap: 20px; font-size: 18px; font-weight: 800; }
+        #upgrade-prob { color: #ffebee; }
+        #upgrade-ticket-info { color: #84ffff; font-size: 16px; margin-top: 4px; }
+
+        /* 상점 디자인 */
+        .shop-title { font-size: 16px; color: #777788; margin-top: 5px; font-weight: 900; text-align: center; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn-shop { padding: 18px; font-size: 18px; background: #111116; color: #aaaabb; border: 2px dashed #333344; }
+        .btn-shop:hover { color: #00e5ff; border-color: #00e5ff; background: #1a1a24; }
+
+        /* 애니메이션 효과 */
+        .shake { animation: shakeEffect 0.4s ease-in-out; }
+        @keyframes shakeEffect {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+        
+        .upgrading-effect { animation: flashRed 0.2s infinite alternate; }
+        @keyframes flashRed {
+            from { background-color: #ff3d00; }
+            to { background-color: #aa0000; box-shadow: 0 0 40px #ff0000; }
+        }
+
+        /* 로그 메시지 */
+        #log-container {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            text-align: center;
+            pointer-events: none;
+            z-index: 20;
+        }
+        .log-msg {
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #333;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-size: 20px; /* 로그 텍스트 대형화 */
+            font-weight: 900;
+            opacity: 0;
+            transition: all 0.2s ease;
+            transform: scale(0.8) translateY(20px);
+            margin-bottom: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+        }
+        .log-success { color: #00ff88; border-color: #00ff88; text-shadow: 0 0 15px rgba(0,255,136,0.6); }
+        .log-fail { color: #ff0055; border-color: #ff0055; text-shadow: 0 0 15px rgba(255,0,85,0.6); }
+        .log-gamble-win { color: #ffce00; border-color: #ffce00; text-shadow: 0 0 15px rgba(255,206,0,0.6); font-size: 24px; }
+        .log-warning { color: #ff9100; border-color: #ff9100; }
+
+        /* 신화 오버레이 */
+        #mythic-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.98); z-index: 100;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 30px; text-align: center; opacity: 0; pointer-events: none; transition: opacity 1s ease;
+        }
+        #mythic-overlay.active { opacity: 1; pointer-events: auto; }
+        .mythic-title { font-size: 46px; font-weight: 900; color: #ff0055; text-shadow: 0 0 20px #ff0055, 0 0 40px #ff0000; margin-bottom: 10px; animation: mythicPulse 1s infinite alternate; }
+        .mythic-sword-box { width: 250px; height: 250px; border-radius: 50%; box-shadow: 0 0 60px rgba(255, 0, 85, 0.8); border: 5px solid #ff0055; overflow: hidden; margin: 30px 0; }
+        .mythic-sword-box img { width: 100%; height: 100%; object-fit: cover; }
+        .btn-reset { padding: 22px 50px; font-size: 24px; font-weight: 900; background: #ff0055; color: white; border-radius: 40px; box-shadow: 0 0 30px rgba(255, 0, 85, 0.8); }
+        @keyframes mythicPulse { 0% { transform: scale(0.95); } 100% { transform: scale(1.05); } }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="creator-tag">제작자: 김태인</div>
+
+    <header>
+        <h1>강화연구소</h1>
+        <div class="currency-box">
+            <div id="gold-display"><span id="gold">0</span> G</div>
+            <div id="ticket-display">보호권: <span id="tickets">0</span>장</div>
+        </div>
+    </header>
+    
+    <main id="sword-display">
+        <div id="image-container">
+            <img id="sword-image" src="1.jpg" alt="검" onerror="this.style.display='none';">
+        </div>
+        <h2 id="sword-name">+1 낡은 철검</h2>
+        <p id="sword-desc">설명</p>
+        <div id="sword-power">클릭 수익: <span class="power-highlight">+<span id="click-power">1</span> G</span></div>
+    </main>
+
+    <div id="controls">
+        <!-- 메인 단련 버튼을 최상단으로 분리 및 확대 -->
+        <button id="btn-click" onclick="earnGold()">⛏️ 단련 (골드 채굴)</button>
+
+        <button id="btn-gamble" onclick="gambleGold()">
+            <span>🎲 암시장 도박</span>
+            <span class="gamble-sub">보유 골드 50% 걸기 (승률 40%)</span>
+        </button>
+        
+        <div id="ticket-toggle-container">
+            <span class="toggle-label">🛡️ 파괴 방지권 사용</span>
+            <input type="checkbox" id="chk-ticket">
+        </div>
+
+        <button id="btn-upgrade" onclick="upgradeSword()">
+            <span>망치 내리치기</span>
+            <div class="btn-info-box">
+                <span id="upgrade-cost">비용: 0</span>
+                <span id="upgrade-prob">확률: 0%</span>
+            </div>
+            <span id="upgrade-ticket-info">필요 보호권: 50장</span>
+        </button>
+
+        <div class="shop-title">블랙마켓 (보호권 1장 = 10,000 G)</div>
+        <div class="grid-2">
+            <button class="btn-shop" onclick="buyTickets(1)">+1장 구매</button>
+            <button class="btn-shop" onclick="buyTickets(10)">+10장 구매</button>
+        </div>
+    </div>
+
+    <div id="log-container"></div>
+
+    <div id="mythic-overlay">
+        <div class="mythic-title">APOCALYPSE</div>
+        <div style="color:#aaa; letter-spacing: 5px; font-size: 18px; font-weight: bold;">신화의 끝에 도달했습니다</div>
+        <div class="mythic-sword-box"><img src="10.jpg" alt="아포칼립스"></div>
+        <div style="margin-bottom: 50px; color: #fff; line-height: 1.6; font-size: 22px; font-weight: 900;">
+            절망적인 확률을 뚫고 승리하셨습니다.<br>
+            당신은 진정한 도박과 강화의 신입니다.<br>
+            <span style="color: #ffce00; font-size: 20px; display: block; margin-top: 15px;">[제작자: 김태인]</span>
+        </div>
+        <button class="btn-reset" onclick="resetGame()">윤회 (처음으로)</button>
+    </div>
+</div>
+
+<script>
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = AudioContext ? new AudioContext() : null;
+
+    function playSound(type) {
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+
+        if (type === 'tick') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(800, now);
+            gainNode.gain.setValueAtTime(0.05, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+            osc.start(now); osc.stop(now + 0.05);
+        } else if (type === 'success') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(523.25, now);
+            osc.frequency.setValueAtTime(1046.50, now + 0.1);
+            gainNode.gain.setValueAtTime(0.3, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+            osc.start(now); osc.stop(now + 0.5);
+        } else if (type === 'fail') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.linearRampToValueAtTime(40, now + 0.5);
+            gainNode.gain.setValueAtTime(0.4, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+            osc.start(now); osc.stop(now + 0.5);
+        } else if (type === 'protect') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(300, now);
+            osc.frequency.linearRampToValueAtTime(150, now + 0.2);
+            gainNode.gain.setValueAtTime(0.3, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            osc.start(now); osc.stop(now + 0.2);
+        } else if (type === 'gamble_win') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, now);
+            osc.frequency.setValueAtTime(1760, now + 0.1);
+            gainNode.gain.setValueAtTime(0.2, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.start(now); osc.stop(now + 0.3);
+        } else if (type === 'mythic') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(100, now);
+            osc.frequency.linearRampToValueAtTime(880, now + 2);
+            gainNode.gain.setValueAtTime(0.5, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 2);
+            osc.start(now); osc.stop(now + 2);
+        }
+    }
+
+    function triggerVibe(pattern) {
+        if (navigator.vibrate) navigator.vibrate(pattern);
+    }
+
+    const swords = [
+        { level: 1, name: "낡은 철검", desc: "도박장의 빚을 갚기 위해 쥔 녹슨 검.", power: 1, cost: 100, prob: 90, color: "#888888", glow: "rgba(255,255,255,0.1)" },
+        { level: 2, name: "냉철한 강철검", desc: "조금 쓸만해졌지만, 갈 길은 멀다.", power: 3, cost: 500, prob: 75, color: "#aaddff", glow: "rgba(170,221,255,0.3)" },
+        { level: 3, name: "기사의 서약", desc: "기사의 피가 묻어있는 예리한 검.", power: 10, cost: 2500, prob: 55, color: "#77ff33", glow: "rgba(119,255,51,0.4)" },
+        { level: 4, name: "밤의 그림자", desc: "어둠 속에서 빛을 잃은 암살자의 검.", power: 35, cost: 12000, prob: 40, color: "#00e5ff", glow: "rgba(0,229,255,0.5)" },
+        { level: 5, name: "화염의 숨결", desc: "검신이 용암처럼 끓어오른다.", power: 120, cost: 60000, prob: 25, color: "#ff5500", glow: "rgba(255,85,0,0.6)" },
+        { level: 6, name: "폭풍의 인도자", desc: "휘두를 때마다 벼락이 치는 마검.", power: 450, cost: 300000, prob: 15, color: "#cc00ff", glow: "rgba(204,0,255,0.7)" },
+        { level: 7, name: "황혼의 마검", desc: "여기서부터는 신의 영역에 가깝다.", power: 1800, cost: 1500000, prob: 8, color: "#7a00ff", glow: "rgba(122,0,255,0.8)" },
+        { level: 8, name: "드래곤 슬레이어", desc: "거룡의 뼈를 깎아 만든 대학살의 무기.", power: 8000, cost: 8000000, prob: 3, color: "#ffaa00", glow: "rgba(255,170,0,0.9)" },
+        { level: 9, name: "천상의 집행자", desc: "인간이 다룰 수 있는 궁극의 한계점.", power: 30000, cost: 40000000, prob: 0.5, color: "#ffffaa", glow: "rgba(255,255,170,1)" },
+        { level: 10, name: "영원한 종말: 아포칼립스", desc: "우주의 파멸. 절대적인 신화의 무기.", power: 999999, cost: "MAX", prob: "MAX", color: "#ff0055", glow: "rgba(255,0,85,1)" }
+    ];
+
+    let currentLevel = 1;
+    let currentGold = 0;
+    let currentTickets = 0;
+    const TICKET_PRICE = 10000;
+    let isProcessing = false;
+
+    const uiGold = document.getElementById('gold');
+    const uiTickets = document.getElementById('tickets');
+    const uiSwordImage = document.getElementById('sword-image');
+    const uiImageContainer = document.getElementById('image-container');
+    const uiSwordName = document.getElementById('sword-name');
+    const uiSwordDesc = document.getElementById('sword-desc');
+    const uiClickPower = document.getElementById('click-power');
+    const uiUpgradeCost = document.getElementById('upgrade-cost');
+    const uiUpgradeProb = document.getElementById('upgrade-prob');
+    const uiTicketInfo = document.getElementById('upgrade-ticket-info');
+    const uiBtnUpgrade = document.getElementById('btn-upgrade');
+    const uiBtnClick = document.getElementById('btn-click');
+    const uiBtnGamble = document.getElementById('btn-gamble');
+    const chkTicket = document.getElementById('chk-ticket');
+    const logContainer = document.getElementById('log-container');
+    const gameContainer = document.getElementById('game-container');
+
+    // 단련 버튼: 클릭 시 약한 진동 추가 및 딜레이 중에도 골드 수급 가능
+    function earnGold() {
+        currentGold += swords[currentLevel - 1].power;
+        uiGold.innerText = currentGold.toLocaleString(); // 글자 즉시 업데이트
+        
+        // ⚡ 클릭할 때마다 아주 약하고 경쾌한 진동 발생 (10ms)
+        triggerVibe([10]); 
+
+        // 강화 중이 아닐 때만 UI 전체 새로고침
+        if (!isProcessing) {
+            updateUI();
+        }
+    }
+
+    function gambleGold() {
+        if (isProcessing) return;
+        if (currentGold < 10) {
+            showLog("최소 10 골드가 필요합니다.", "warning");
+            return;
+        }
+
+        let betAmount = Math.floor(currentGold / 2);
+        currentGold -= betAmount;
+        updateUI();
+
+        isProcessing = true;
+        setButtonState(true);
+        uiBtnGamble.innerHTML = "주사위 굴리는 중... 🎲";
+
+        let ticks = 0;
+        let tickInt = setInterval(() => { playSound('tick'); triggerVibe([30]); }, 150);
+
+        setTimeout(() => {
+            clearInterval(tickInt);
+            isProcessing = false;
+            setButtonState(false);
+            uiBtnGamble.innerHTML = `<span>🎲 암시장 도박</span><span class="gamble-sub">보유 골드 50% 걸기 (승률 40%)</span>`;
+
+            let rand = Math.random() * 100;
+            if (rand <= 40) {
+                let winAmount = Math.floor(betAmount * 2.5);
+                currentGold += winAmount;
+                playSound('gamble_win');
+                triggerVibe([50, 50, 100]);
+                showLog(`대박! 도박 성공! (+${winAmount.toLocaleString()} G) 🤑`, "log-gamble-win");
+            } else {
+                playSound('fail');
+                triggerVibe([200]);
+                gameContainer.classList.add('shake');
+                setTimeout(() => gameContainer.classList.remove('shake'), 400);
+                showLog(`도박 실패... 전재산의 반을 날렸습니다. 💸`, "fail");
+            }
+            updateUI();
+        }, 900);
+    }
+
+    function buyTickets(amount) {
+        if (isProcessing) return;
+        let cost = amount * TICKET_PRICE;
+        if (currentGold < cost) {
+            showLog(`골드가 부족합니다! (필요: ${cost.toLocaleString()} G)`, "warning");
+            return;
+        }
+        currentGold -= cost;
+        currentTickets += amount;
+        playSound('success');
+        showLog(`보호권 ${amount}장 구매 완료!`, "success");
+        updateUI();
+    }
+
+    function setButtonState(disabled) {
+        uiBtnUpgrade.disabled = disabled;
+        uiBtnGamble.disabled = disabled;
+        document.querySelectorAll('.btn-shop').forEach(b => b.disabled = disabled);
+        // btn-click은 비활성화하지 않음 (강화 중에도 캘 수 있게)
+    }
+
+    function updateUI() {
+        uiGold.innerText = currentGold.toLocaleString();
+        uiTickets.innerText = currentTickets.toLocaleString();
+        
+        const sword = swords[currentLevel - 1];
+        let reqTickets = currentLevel * 50;
+
+        uiSwordImage.style.display = 'block';
+        uiSwordImage.src = `${currentLevel}.jpg`;
+        
+        uiImageContainer.style.setProperty('--glow-color', sword.glow);
+        uiImageContainer.style.borderColor = sword.color;
+        uiImageContainer.style.animation = "borderPulse 2s infinite";
+        
+        uiSwordName.innerText = `+${currentLevel} ${sword.name}`;
+        uiSwordName.style.color = sword.color;
+        uiSwordName.style.textShadow = `0 0 20px ${sword.glow}`;
+        uiSwordDesc.innerText = sword.desc;
+        uiClickPower.innerText = sword.power.toLocaleString();
+
+        if (currentLevel >= 10) {
+            uiUpgradeCost.innerText = "MAX";
+            uiUpgradeProb.innerText = "";
+            uiTicketInfo.innerText = "";
+            uiBtnUpgrade.disabled = true;
+            uiBtnUpgrade.style.background = "#222";
+            document.getElementById('mythic-overlay').classList.add('active');
+        } else {
+            uiUpgradeCost.innerText = `비용: ${sword.cost.toLocaleString()}`;
+            uiUpgradeProb.innerText = `확률: ${sword.prob}%`;
+            uiTicketInfo.innerText = `보호권 필요량: ${reqTickets}장 (체크시 자동소모)`;
+        }
+    }
+
+    function upgradeSword() {
+        if (isProcessing || currentLevel >= 10) return;
+
+        const sword = swords[currentLevel - 1];
+        let reqTickets = currentLevel * 50;
+        let isUsingTicket = chkTicket.checked;
+
+        if (currentGold < sword.cost) {
+            showLog("제련 비용이 부족합니다!", "warning");
+            return;
+        }
+
+        if (isUsingTicket && currentTickets < reqTickets) {
+            showLog(`보호권이 부족합니다! (필요: ${reqTickets}장)`, "warning");
+            return;
+        }
+
+        currentGold -= sword.cost;
+        updateUI();
+
+        isProcessing = true;
+        setButtonState(true);
+        uiBtnUpgrade.classList.add('upgrading-effect');
+        uiBtnUpgrade.innerHTML = "망치질 중... 🔨";
+
+        let tickInt = setInterval(() => {
+            playSound('tick');
+            triggerVibe([20]);
+        }, 150);
+
+        setTimeout(() => {
+            clearInterval(tickInt);
+            isProcessing = false;
+            setButtonState(false);
+            uiBtnUpgrade.classList.remove('upgrading-effect');
+            uiBtnUpgrade.innerHTML = `
+                <span>망치 내리치기</span>
+                <div class="btn-info-box">
+                    <span id="upgrade-cost"></span>
+                    <span id="upgrade-prob"></span>
+                </div>
+                <span id="upgrade-ticket-info"></span>
+            `;
+
+            const randomNum = Math.random() * 100;
+
+            if (randomNum <= sword.prob) {
+                currentLevel++;
+                if (currentLevel === 10) {
+                    playSound('mythic');
+                    triggerVibe([500, 100, 500, 100, 1000]);
+                } else {
+                    playSound('success');
+                    triggerVibe([80, 50, 120]);
+                    showLog(`강화 성공! [+${currentLevel} ${swords[currentLevel-1].name}] 💎`, "success");
+                }
+            } else {
+                if (isUsingTicket) {
+                    currentTickets -= reqTickets;
+                    playSound('protect');
+                    triggerVibe([50, 30, 50]);
+                    showLog(`실패! 보호권이 검의 파괴를 막았습니다. 🛡️`, "warning");
+                } else {
+                    currentLevel = 1;
+                    playSound('fail');
+                    triggerVibe([500]);
+                    gameContainer.classList.add('shake');
+                    setTimeout(() => gameContainer.classList.remove('shake'), 400);
+                    showLog(`검이 산산조각 났습니다. 태초마을로 돌아갑니다. 💀`, "fail");
+                }
+            }
+            updateUI();
+        }, 1200);
+    }
+
+    function showLog(message, type) {
+        const msg = document.createElement('div');
+        msg.className = `log-msg ${type}`;
+        msg.innerText = message;
+        logContainer.appendChild(msg);
+
+        setTimeout(() => {
+            msg.style.opacity = '1';
+            msg.style.transform = 'scale(1) translateY(0)';
+        }, 10);
+
+        setTimeout(() => {
+            msg.style.opacity = '0';
+            msg.style.transform = 'scale(0.8) translateY(-20px)';
+            setTimeout(() => msg.remove(), 200);
+        }, 2000);
+    }
+
+    function resetGame() {
+        currentLevel = 1;
+        currentGold = 0;
+        currentTickets = 0;
+        chkTicket.checked = false;
+        uiBtnUpgrade.disabled = false;
+        uiBtnUpgrade.style.background = "linear-gradient(135deg, #ff3d00, #ff9100)";
+        document.getElementById('mythic-overlay').classList.remove('active');
+        updateUI();
+    }
+
+    updateUI();
+</script>
+</body>
+</html>
